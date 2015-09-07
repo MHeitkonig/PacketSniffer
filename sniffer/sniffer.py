@@ -51,11 +51,19 @@ def parse_UDP(packet):
     return source_port, dest_port, data_length, checksum, data
 
 def parse_ARP(packet):
-    header_length = 8
-    header = packet[:header_length]
-    (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation) = header.unpack_from("!HHBBH", header)
-    rest = packet[header_length:]
-    (sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = struct.unpack_from("!3HL3HL", rest)
+    #This time, let's slice it up
+    #hardware_type = packet[0:8]
+    #protocol_type = packet[8:16]
+    #hardware_address_length = ""
+    #protocol_address_length = "" 
+    #operation = "" 
+    #sender_hardware_address = "" 
+    #sender_ip_address = "" 
+    #target_hardware_address = ""
+    #target_ip_address = ""
+    (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address1, sender_hardware_address2, sender_ip_address, target_hardware_address1, target_hardware_address2, target_ip_address) = struct.unpack_from("!HHBBHIHIHII", packet)
+    sender_hardware_address = sender_hardware_address1 + sender_hardware_address2
+    target_hardware_address = target_hardware_address1 + target_hardware_address2
     return hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address
 
 def prettify(mac_string):
@@ -91,18 +99,19 @@ def main():
             	(typecode, code, checksum) = parse_ICMP(data)
 
             elif protocol == 6:
-                 (source_port, dest_port, sequence_number, ack_number, doff, flags, window, checksum, urgent_pointer, data) = parse_TCP(data)
+                print(type_code)  
+                (source_port, dest_port, sequence_number, ack_number, doff, flags, window, checksum, urgent_pointer, data) = parse_TCP(data)
 
 
             else:
                 print("Protocol number {} is not ICMP (1) or UDP (17)\n".format(protocol))
                 continue
         elif type_code == 0x0806:
-            (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(data)
-            print("\nACK:\n\tHardware type: {}\n\tProtocol type: {}\n\tHardware address length: {}\n\tProtocol address length {}:\n\tOperation: {}\n\tSender hardware address: {}\n\tSender ip address: {}\n\tTarget hardware address: {}\n\tTarger IP address: {}\n\t".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address))
+            (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(packet)
+            print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\n\tHardware address length: {}\n\tProtocol address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}\n\t".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address))
 
         else:
-            print("\nPacket ignored: type code {} did not match 0x0800 (IPv4)\n".format(type_code))
+            print("\nPacket ignored: type code {} did not match 0x0800 (IPv4) or 0x806 (ARP)\n".format(type_code))
             continue
 
         print("\n+-+-+-+-+-+-+-+-+-+-+-+")
