@@ -31,7 +31,7 @@ def parse_ICMP(packet):
     data = packet[header_length:]
     (typecode, code, checksum) = struct.unpack_from("!BBH4x", header)
     return typecode, code, checksum
-    
+
 def parse_IP(packet):
     header_length_in_bytes = (packet[0] & 0x0F) * 4
     header = packet[:header_length_in_bytes]
@@ -51,8 +51,12 @@ def parse_UDP(packet):
     return source_port, dest_port, data_length, checksum, data
 
 def parse_ARP(packet):
-	(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = struct.unpack_from("!2H2HHH2H3Q3Q3QI", packet)
-	return hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address
+    header_length = 8
+    header = packet[:header_length]
+    (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation) = header.unpack_from("!HHBBH", header)
+    rest = packet[header_length:]
+    (sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = struct.unpack_from("!3HL3HL", rest)
+    return hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address
 
 def prettify(mac_string):
     a = ""
@@ -68,7 +72,7 @@ def parseFlags(flags):
             flagString += flagnames[x] 
     return flagString
 
-def main():    
+def main():
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
     #s.bind(("localhost",0))
 
@@ -88,16 +92,19 @@ def main():
 
             elif protocol == 6:
                  (source_port, dest_port, sequence_number, ack_number, doff, flags, window, checksum, urgent_pointer, data) = parse_TCP(data)
-       #     elif protocol == :
-        #    	(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(data)
+
 
             else:
                 print("Protocol number {} is not ICMP (1) or UDP (17)\n".format(protocol))
                 continue
+        elif type_code == 0x0806:
+            (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(data)
+            print("\nACK:\n\tHardware type: {}\n\tProtocol type: {}\n\tHardware address length: {}\n\tProtocol address length {}:\n\tOperation: {}\n\tSender hardware address: {}\n\tSender ip address: {}\n\tTarget hardware address: {}\n\tTarger IP address: {}\n\t".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address))
+
         else:
-        	print("\nPacket ignored: type code {} did not match 0x0800 (IPv4)\n".format(type_code))
-        	continue
-        
+            print("\nPacket ignored: type code {} did not match 0x0800 (IPv4)\n".format(type_code))
+            continue
+
         print("\n+-+-+-+-+-+-+-+-+-+-+-+")
         print("\nEthernet:\n\tDestination MAC: {}\n\tSource MAC: {}\n\tType code: {}".format(dest, source, type_code))
         #print("Socket address: {}\n".format(address))
@@ -108,12 +115,6 @@ def main():
             print("\nUDP:\n\tSource port: {}\n\tDestination port: {}\n\tData length: {}\n\tChecksum: {}\n\tData: {}".format(source_port, dest_port, data_length, checksum, data))
         if protocol == 6:
             print("\nTCP:\n\tSource port: {}\n\tDestination port: {}\n\tSequence number: {}\n\tACK number: {}\n\tData Offset: {}\n\tFlags: {}\n\tWindow: {}\n\tChecksum: {}\n\tUrgent pointer: {}\n\tData: {}".format(source_port, dest_port, sequence_number, ack_number, doff, parseFlags(flags), window, checksum, urgent_pointer, data))
-       # if protocol == :
-        #	print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\nHardware address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address))
-        	
-
-
-        
         print("\n\n")
 
 
