@@ -61,23 +61,11 @@ def prettify(mac_string):
     return(a[0:-1])
 
 def parseFlags(flags):
+    flagnames = ["CRW ", "ECE ", "URG ", "ACK ", "PSH ", "RST ", "SYN ", "FIN "]
     flagString = ""
-    if flags & 2**7 == 2**7:
-        flagString += "CWR "
-    if flags & 2**6 == 2**6:
-        flagString += "ECE "
-    if flags & 2**5 == 2**5:
-        flagString += "URG "
-    if flags & 2**4 == 2**4:
-        flagString += "ACK "
-    if flags & 2**3 == 2**3:
-        flagString += "PSH "
-    if flags & 2**2 == 2**2:
-        flagString += "RST "
-    if flags & 2**1 == 2**1:
-        flagString += "SYN "
-    if flags & 2**0 == 1:
-        flagString += "FIN "
+    for x in range(0, 7):
+        if flags & 2**x == 2**x:
+            flagString += flagnames[x] 
     return flagString
 
 def main():    
@@ -100,8 +88,8 @@ def main():
 
             elif protocol == 6:
                  (source_port, dest_port, sequence_number, ack_number, doff, flags, window, checksum, urgent_pointer, data) = parse_TCP(data)
-            elif protocol == :
-            	(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(data)
+       #     elif protocol == :
+        #    	(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(data)
 
             else:
                 print("Protocol number {} is not ICMP (1) or UDP (17)\n".format(protocol))
@@ -120,8 +108,8 @@ def main():
             print("\nUDP:\n\tSource port: {}\n\tDestination port: {}\n\tData length: {}\n\tChecksum: {}\n\tData: {}".format(source_port, dest_port, data_length, checksum, data))
         if protocol == 6:
             print("\nTCP:\n\tSource port: {}\n\tDestination port: {}\n\tSequence number: {}\n\tACK number: {}\n\tData Offset: {}\n\tFlags: {}\n\tWindow: {}\n\tChecksum: {}\n\tUrgent pointer: {}\n\tData: {}".format(source_port, dest_port, sequence_number, ack_number, doff, parseFlags(flags), window, checksum, urgent_pointer, data))
-        if protocol == :
-        	print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\nHardware address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address))
+       # if protocol == :
+        #	print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\nHardware address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address))
         	
 
 
