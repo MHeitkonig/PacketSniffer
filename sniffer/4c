@@ -1,3 +1,0 @@
-The socket gives us information on the network interface name that the frame was received through (in our case, eth0)
-the number after that, 2048, looks an awful lot like the type code, so those two might be related
-then we're left with two times the number '1', and a bytestring b'\xbc_\xf4I(\xe6', but we can't make anything of those values.
