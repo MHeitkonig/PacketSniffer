@@ -16,9 +16,9 @@ def parse_ethernet(frame):
     return dest, source, type_code, packet
 
 def parse_TCP(packet):
-    header_length = 24
+    header_length = 20
     header = packet[:header_length]
-    (source_port, dest_port, sequence_number, ack_number, doff_res_flag , window, checksum, urgent_pointer, options) = struct.unpack("!HHLLHHHHL", header)
+    (source_port, dest_port, sequence_number, ack_number, doff_res_flag , window, checksum, urgent_pointer) = struct.unpack("!HHLLHHHH", header)
     doff = (doff_res_flag >> 12)
     header_length = doff * 4
     data = packet[header_length:]
