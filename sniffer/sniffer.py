@@ -49,18 +49,12 @@ def parse_UDP(packet):
     return source_port, dest_port, data_length, checksum, data
 
 def parse_ARP(packet):
-    (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address1, sender_hardware_address2, sender_ip_address, target_hardware_address1, target_hardware_address2, target_ip_address) = struct.unpack_from("!HHBBHIHIHII", packet)
-    sender_hardware_address = sender_hardware_address1 + sender_hardware_address2
-    target_hardware_address = target_hardware_address1 + target_hardware_address2
+    (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = struct.unpack_from("!HHBBH6sI6sI", packet)
 
     # Converting IP addresses to dotted decimal representation
     sender_ip_address = socket.inet_ntoa(struct.pack("!L", sender_ip_address))
     target_ip_address = socket.inet_ntoa(struct.pack("!L", target_ip_address))
     
-    #converting hardware addresses to "MAC formatting"
-    #sender_hardware_address = prettify(hex(sender_hardware_address))
-    #target_hardware_address = prettify(hex(target_hardware_address))
-
     return hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address
 
 def prettify(mac_string):
@@ -105,7 +99,7 @@ def main():
         
         elif type_code == 0x0806:
             (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(packet)
-            print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\n\tHardware address length: {}\n\tProtocol address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}\n\t".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address))
+            print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\n\tHardware address length: {}\n\tProtocol address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}\n\t".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, prettify(sender_hardware_address), sender_ip_address, prettify(target_hardware_address), target_ip_address))
 
         else:
             print("\nPacket ignored: type code {} did not match 0x0800 (IPv4) or 0x806 (ARP)\n".format(type_code))
