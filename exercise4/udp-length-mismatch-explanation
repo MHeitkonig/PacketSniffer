@@ -1,0 +1,1 @@
+Data is everything that gets passed on after the header. Data length is the size of the header plus data. The header is 8 bytes long, which means that the data length will always be 8 bytes larger than the size of the data.

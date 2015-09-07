@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "./sniffer2.py", line 126, in <module>
+    main()
+  File "./sniffer2.py", line 98, in main
+    (source_port, dest_port, sequence_number, ack_number, doff, flags, window, checksum, urgent_pointer, data) = parse_TCP(data)
+  File "./sniffer2.py", line 21, in parse_TCP
+    (source_port, dest_port, sequence_number, ack_number, doff_res_flag , window, checksum, urgent_pointer, options) = struct.unpack("!HHLLHHHHL", header)
+struct.error: unpack requires a bytes object of length 24
+
