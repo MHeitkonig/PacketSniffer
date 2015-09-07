@@ -58,8 +58,8 @@ def parse_ARP(packet):
     target_ip_address = socket.inet_ntoa(struct.pack("!L", target_ip_address))
     
     #converting hardware addresses to "MAC formatting"
-    sender_hardware_address = prettify(hex(sender_hardware_address))
-    target_hardware_address = prettify(hex(target_hardware_address))
+    #sender_hardware_address = prettify(hex(sender_hardware_address))
+    #target_hardware_address = prettify(hex(target_hardware_address))
 
     return hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address
 
