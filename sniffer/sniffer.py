@@ -73,48 +73,60 @@ def parseFlags(flags):
 
 def main():
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
-
+    
     while True:
+        #Ethernet
         (frame, address) = s.recvfrom(65565)
         (dest, source, type_code, packet) = parse_ethernet(frame)
         dest = prettify(dest)
         source = prettify(source)
+
+        #IP
         if type_code == 0x0800:
             (header_length_in_bytes, data, total_length, protocol, source_addr, dest_addr) = parse_IP(packet)
-            if protocol == 17:
-                (source_port, dest_port, data_length, checksum, data) = parse_UDP(data)
-                
-            
-            elif protocol == 1:
+            #ICMP
+            if protocol == 1:
             	(typecode, code, checksum) = parse_ICMP(data)
-
+            #TCP
             elif protocol == 6:
-                print(type_code)  
                 (source_port, dest_port, sequence_number, ack_number, doff, flags, window, checksum, urgent_pointer, data) = parse_TCP(data)
-
-
-            else:
-                print("Protocol number {} is not ICMP (1), TCP (6), or UDP (17)\n".format(protocol))
-                continue
-        
+            #UDP
+            elif protocol == 17:
+                (source_port, dest_port, data_length, checksum, data) = parse_UDP(data)
+        #ARP
         elif type_code == 0x0806:
             (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(packet)
-            print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\n\tHardware address length: {}\n\tProtocol address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}\n\t".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, prettify(sender_hardware_address), sender_ip_address, prettify(target_hardware_address), target_ip_address))
-
+            
         else:
-            print("\nPacket ignored: type code {} did not match 0x0800 (IPv4) or 0x806 (ARP)\n".format(type_code))
+            print("\n*************************************************")
+            print("\nPacket ignored: type code {} did not match 0x0800 (IPv4) or 0x806 (ARP)".format(type_code))
             continue
 
-        print("\n+-+-+-+-+-+-+-+-+-+-+-+")
+        #Print all parsed data
+        print("\n*************************************************")
         print("\nEthernet:\n\tDestination MAC: {}\n\tSource MAC: {}\n\tType code: {}".format(dest, source, type_code))
-        print("\nIP:\n\tHeader length: {}\n\tTotal length: {}\n\tProtocol: {}\n\tSource address: {}\n\tDestination address: {}".format(header_length_in_bytes, total_length, protocol, source_addr, dest_addr))
-        if protocol == 1:
-            print ("\nICMP:\n\t\tTypecode: {}\n\t\tCode: {}\n\t\tChecksum: {}\n".format(typecode, code, checksum))
-        if protocol == 17:
-            print("\nUDP:\n\tSource port: {}\n\tDestination port: {}\n\tData length: {}\n\tChecksum: {}\n\tData: {}".format(source_port, dest_port, data_length, checksum, data))
-        if protocol == 6:
-            print("\nTCP:\n\tSource port: {}\n\tDestination port: {}\n\tSequence number: {}\n\tACK number: {}\n\tData Offset: {}\n\tFlags: {}\n\tWindow: {}\n\tChecksum: {}\n\tUrgent pointer: {}\n\tData: {}".format(source_port, dest_port, sequence_number, ack_number, doff, parseFlags(flags), window, checksum, urgent_pointer, data))
-        print("\n\n")
+        
+        #IP
+        if type_code == 0x800:
+            print("\nIP:\n\tHeader length: {}\n\tTotal length: {}\n\tProtocol: {}\n\tSource address: {}\n\tDestination address: {}".format(header_length_in_bytes, total_length, protocol, source_addr, dest_addr))
+            
+            #ICMP
+            if protocol == 1:
+                print ("\nICMP:\n\tTypecode: {}\n\tCode: {}\n\tChecksum: {}".format(typecode, code, checksum))
+            #TCP
+            elif protocol == 6:
+                print("\nTCP:\n\tSource port: {}\n\tDestination port: {}\n\tSequence number: {}\n\tACK number: {}\n\tData Offset: {}\n\tFlags: {}\n\tWindow: {}\n\tChecksum: {}\n\tUrgent pointer: {}\n\tData: {}".format(source_port, dest_port, sequence_number, ack_number, doff, parseFlags(flags), window, checksum, urgent_pointer, data))
+            #UDP
+            elif protocol == 17:
+                print("\nUDP:\n\tSource port: {}\n\tDestination port: {}\n\tData length: {}\n\tChecksum: {}\n\tData: {}".format(source_port, dest_port, data_length, checksum, data))
+            #Unsupported
+            else:
+                print("\nProtocol number {} is not ICMP (1), TCP (6), or UDP (17)".format(protocol))
+
+        #ARP
+        elif type_code == 0x806:
+            print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\n\tHardware address length: {}\n\tProtocol address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}\n\t".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, prettify(sender_hardware_address), sender_ip_address, prettify(target_hardware_address), target_ip_address))
+        
 
 if __name__ == "__main__":
     main()
