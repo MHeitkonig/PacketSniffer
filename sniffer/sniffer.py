@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Authors: Tim van Dijk & Martijn Heitkönig
 
 import socket
 import struct
@@ -54,7 +55,7 @@ def parse_ARP(packet):
     # Converting IP addresses to dotted decimal representation
     sender_ip_address = socket.inet_ntoa(struct.pack("!L", sender_ip_address))
     target_ip_address = socket.inet_ntoa(struct.pack("!L", target_ip_address))
-    
+
     return hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address
 
 def prettify(mac_string):
@@ -86,7 +87,7 @@ def main():
             (header_length_in_bytes, data, total_length, protocol, source_addr, dest_addr) = parse_IP(packet)
             #ICMP
             if protocol == 1:
-            	(typecode, code, checksum) = parse_ICMP(data)
+                (typecode, code, checksum) = parse_ICMP(data)
             #TCP
             elif protocol == 6:
                 (source_port, dest_port, sequence_number, ack_number, doff, flags, window, checksum, urgent_pointer, data) = parse_TCP(data)
@@ -96,7 +97,7 @@ def main():
         #ARP
         elif type_code == 0x0806:
             (hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, sender_hardware_address, sender_ip_address, target_hardware_address, target_ip_address) = parse_ARP(packet)
-            
+
         else:
             print("\n*************************************************")
             print("\nPacket ignored: type code {} did not match 0x0800 (IPv4) or 0x806 (ARP)".format(type_code))
@@ -104,7 +105,7 @@ def main():
 
         #Print all parsed data
         print("\n*************************************************")
-        print("\nEthernet:\n\tDestination MAC: {}\n\tSource MAC: {}\n\tType code: {}".format(dest, source, type_code))
+        print("\nEthernet:\n\tDestination MAC: {}\n\tSource MAC: {}\n\tType code: {} ({})".format(dest, source, type_code, hex(type_code)))
         
         #IP
         if type_code == 0x800:
@@ -126,7 +127,6 @@ def main():
         #ARP
         elif type_code == 0x806:
             print("\nARP:\n\tHardware type: {}\n\tProtocol type: {}\n\tHardware address length: {}\n\tProtocol address length: {}\n\tOperation: {}\n\tSender hardware address: {}\n\tSender IP address: {}\n\tTarget hardware address: {}\n\tTarget IP address: {}\n\t".format(hardware_type, protocol_type, hardware_address_length, protocol_address_length, operation, prettify(sender_hardware_address), sender_ip_address, prettify(target_hardware_address), target_ip_address))
-        
 
 if __name__ == "__main__":
     main()
