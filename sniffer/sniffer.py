@@ -65,7 +65,7 @@ def prettify(mac_string):
     return(a[0:-1])
 
 def parseFlags(flags):
-    flagnames = ["CRW ", "ECE ", "URG ", "ACK ", "PSH ", "RST ", "SYN ", "FIN "]
+    flagnames = ["FIN ", "SYN ", "RST ", "PSH ", "ACK ", "URG ", "ECE ", "CRW "]
     flagString = ""
     for x in range(0, 7):
         if flags & 2**x == 2**x:
